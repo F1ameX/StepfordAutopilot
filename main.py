@@ -3,44 +3,56 @@ import cv2
 from PIL import ImageGrab
 
 
+def get_color_limits(color):
+    color = np.uint8([[color]])
+    hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
+    hue = hsv_color[0][0][0]
+
+    if hue >= 165:
+        lower_limit = np.array([hue - 10, 100, 100], dtype=np.uint8)
+        upper_limit = np.array([180, 255, 255], dtype=np.uint8)
+    elif hue <= 15:
+        lower_limit = np.array([0, 100, 100], dtype=np.uint8)
+        upper_limit = np.array([hue + 10, 255, 255], dtype=np.uint8)
+    else:
+        lower_limit = np.array([hue - 10, 100, 100], dtype=np.uint8)
+        upper_limit = np.array([hue + 10, 255, 255], dtype=np.uint8)
+
+    return lower_limit, upper_limit
+
+
 def detect_traffic_light_color(roi_image):
-    hsv_image = cv2.cvtColor(roi_image, cv2.COLOR_RGB2HSV)
+    red_color = np.array([255, 0, 0])
+    yellow_color = np.array([255, 255, 0])
+    green_color = np.array([0, 255, 0])
 
-    red_lower_1 = np.array([0, 100, 100])
-    red_upper_1 = np.array([10, 255, 255])
-    red_lower_2 = np.array([160, 100, 100])
-    red_upper_2 = np.array([179, 255, 255])
+    hsv_image = cv2.cvtColor(roi_image, cv2.COLOR_BGR2HSV)
 
-    yellow_lower = np.array([10, 50, 50])
-    yellow_upper = np.array([40, 255, 255])
+    red_lower_limit, red_upper_limit = get_color_limits(red_color)
+    yellow_lower_limit, yellow_upper_limit = get_color_limits(yellow_color)
+    green_lower_limit, green_upper_limit = get_color_limits(green_color)
 
-    green_lower = np.array([40, 100, 100])
-    green_upper = np.array([70, 255, 255])
-
-    red_mask_1 = cv2.inRange(hsv_image, red_lower_1, red_upper_1)
-    red_mask_2 = cv2.inRange(hsv_image, red_lower_2, red_upper_2)
-    red_mask = cv2.bitwise_or(red_mask_1, red_mask_2)
-
-    yellow_mask = cv2.inRange(hsv_image, yellow_lower, yellow_upper)
-    green_mask = cv2.inRange(hsv_image, green_lower, green_upper)
+    red_mask = cv2.inRange(hsv_image, red_lower_limit, red_upper_limit)
+    yellow_mask = cv2.inRange(hsv_image, yellow_lower_limit, yellow_upper_limit)
+    green_mask = cv2.inRange(hsv_image, green_lower_limit, green_upper_limit)
 
     red_pixels = cv2.countNonZero(red_mask)
     yellow_pixels = cv2.countNonZero(yellow_mask)
     green_pixels = cv2.countNonZero(green_mask)
 
     if red_pixels > max(yellow_pixels, green_pixels):
-        print("Red Color RN")
+        return 1
     elif yellow_pixels > max(red_pixels, green_pixels):
-        print("Yellow Color RN")
+        return 2
     elif green_pixels > max(red_pixels, yellow_pixels):
-        print("Green color RN")
+        return 3
 
 
 def process_roi(image, roi):
     x, y, w, h = roi
     roi_image = image[y:y+h, x:x+w]
-    gray_roi = cv2.cvtColor(roi_image, cv2.COLOR_BGR2RGB)
-    return gray_roi
+    rgb_roi = cv2.cvtColor(roi_image, cv2.COLOR_BGR2RGB)
+    return rgb_roi
 
 
 while True:
@@ -53,7 +65,7 @@ while True:
     traffic_light_image = process_roi(img_np, traffic_light)
     speedometer_image = process_roi(img_np, speedometer)
 
-    detect_traffic_light_color(traffic_light_image)
+    traffic_light_color = detect_traffic_light_color(traffic_light_image)
 
     cv2.imshow('Traffic Light', traffic_light_image)
     cv2.imshow('Speedometer', speedometer_image)
