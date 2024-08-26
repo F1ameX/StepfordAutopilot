@@ -1,5 +1,7 @@
 import numpy as np
+import pyautogui as gw
 import cv2
+import time
 from PIL import ImageGrab
 
 
@@ -48,6 +50,17 @@ def detect_traffic_light_color(roi_image):
         return 3
 
 
+def aws_system_skipper(roi_image):
+    yellow_color = np.array([255, 255, 0])
+    hsv_image = cv2.cvtColor(roi_image, cv2.COLOR_BGR2HSV)
+    yellow_lower_limit, yellow_upper_limit = get_color_limits(yellow_color)
+    yellow_mask = cv2.inRange(hsv_image, yellow_lower_limit, yellow_upper_limit)
+    yellow_pixels = cv2.countNonZero(yellow_mask)
+
+    if yellow_pixels > 0:
+        gw.press('q')
+
+
 def process_roi(image, roi):
     x, y, w, h = roi
     roi_image = image[y:y+h, x:x+w]
@@ -65,6 +78,7 @@ while True:
     traffic_light_image = process_roi(img_np, traffic_light)
     speedometer_image = process_roi(img_np, speedometer)
 
+    aws_system_skipper(speedometer_image)
     traffic_light_color = detect_traffic_light_color(traffic_light_image)
 
     cv2.imshow('Traffic Light', traffic_light_image)
