@@ -3,24 +3,8 @@ import pyautogui as gw
 import cv2
 import time
 from PIL import ImageGrab
-
-
-def get_color_limits(color):
-    color = np.uint8([[color]])
-    hsv_color = cv2.cvtColor(color, cv2.COLOR_RGB2HSV)
-    hue = hsv_color[0][0][0]
-
-    if hue >= 165:
-        lower_limit = np.array([hue - 10, 100, 100], dtype=np.uint8)
-        upper_limit = np.array([180, 255, 255], dtype=np.uint8)
-    elif hue <= 15:
-        lower_limit = np.array([0, 100, 100], dtype=np.uint8)
-        upper_limit = np.array([hue + 10, 255, 255], dtype=np.uint8)
-    else:
-        lower_limit = np.array([hue - 10, 100, 100], dtype=np.uint8)
-        upper_limit = np.array([hue + 10, 255, 255], dtype=np.uint8)
-
-    return lower_limit, upper_limit
+from util import *
+from speed_checker import *
 
 
 def detect_traffic_light_color(roi_image):
@@ -57,8 +41,9 @@ def aws_system_skipper(roi_image):
     yellow_mask = cv2.inRange(hsv_image, yellow_lower_limit, yellow_upper_limit)
     yellow_pixels = cv2.countNonZero(yellow_mask)
 
-    if yellow_pixels > 0:
+    if yellow_pixels > 15:
         gw.press('q')
+    cv2.imshow("Yellow mask AWS", yellow_mask)
 
 
 def process_roi(image, roi):
@@ -79,10 +64,11 @@ while True:
     speedometer_image = process_roi(img_np, speedometer)
 
     aws_system_skipper(speedometer_image)
-    traffic_light_color = detect_traffic_light_color(traffic_light_image)
+    find_speed_limit(speedometer_image)
 
+    traffic_light_color = detect_traffic_light_color(traffic_light_image)
+    print(traffic_light_color)
     cv2.imshow('Traffic Light', traffic_light_image)
-    cv2.imshow('Speedometer', speedometer_image)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         cv2.destroyAllWindows()
