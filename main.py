@@ -1,7 +1,6 @@
 import numpy as np
 import pyautogui as gw
 import cv2
-import time
 from PIL import ImageGrab
 from util import *
 from speed_checker import *
