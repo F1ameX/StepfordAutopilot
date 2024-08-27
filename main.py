@@ -64,12 +64,12 @@ while True:
     speedometer_image = process_roi(img_np, speedometer)
 
     aws_system_skipper(speedometer_image)
-    find_speed_limit(speedometer_image)
+    set_speed(speedometer_image)
 
     traffic_light_color = detect_traffic_light_color(traffic_light_image)
     print(traffic_light_color)
     cv2.imshow('Traffic Light', traffic_light_image)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('`'):
         cv2.destroyAllWindows()
         break
