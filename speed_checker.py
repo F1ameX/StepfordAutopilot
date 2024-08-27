@@ -54,9 +54,3 @@ def set_speed(roi_image):
     elif speed_condition == 3:
         for i in range(1, 24):
             gw.press('w')
-
-
-
-
-
-
