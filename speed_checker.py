@@ -42,12 +42,9 @@ def find_speed_limit(roi_image):
     elif green_y > red_y:
         return 3
 
-    cv2.imshow("Red speed limit point", full_mask)
-
 
 def set_speed(roi_image):
     speed_condition = find_speed_limit(roi_image)
-    print(speed_condition, end=' condition\n')
     if speed_condition == 2:
         for i in range(1, 8):
             gw.press('s')

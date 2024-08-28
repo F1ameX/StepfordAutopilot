@@ -4,6 +4,7 @@ import cv2
 from PIL import ImageGrab
 from util import *
 from speed_checker import *
+from distance_recognition import *
 
 
 def detect_traffic_light_color(roi_image):
@@ -42,7 +43,6 @@ def aws_system_skipper(roi_image):
 
     if yellow_pixels > 15:
         gw.press('q')
-    cv2.imshow("Yellow mask AWS", yellow_mask)
 
 
 def process_roi(image, roi):
@@ -57,17 +57,21 @@ while True:
     img_np = np.array(window)
 
     traffic_light = (220, 520, 60, 130)
+    next_station = (140, 590, 65, 45)
     speedometer = (750, 425, 760, 430)
 
+    next_station_image = process_roi(img_np, next_station)
     traffic_light_image = process_roi(img_np, traffic_light)
     speedometer_image = process_roi(img_np, speedometer)
 
     aws_system_skipper(speedometer_image)
     set_speed(speedometer_image)
 
+    recognize_distance_to_traffic_light(traffic_light_image)
     traffic_light_color = detect_traffic_light_color(traffic_light_image)
     print(traffic_light_color)
-    cv2.imshow('Traffic Light', traffic_light_image)
+
+    cv2.imshow("Next Station Distance Image", next_station_image)
 
     if cv2.waitKey(1) & 0xFF == ord('`'):
         cv2.destroyAllWindows()
