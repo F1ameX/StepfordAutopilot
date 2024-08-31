@@ -17,4 +17,3 @@ def recognize_distance_to_next_station(roi_image):
     gray_image = cv2.cvtColor(roi_image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray_image, 128, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     text = pytesseract.image_to_string(thresh, config=numbers_cfg)
-    print(text)

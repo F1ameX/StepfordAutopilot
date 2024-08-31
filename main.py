@@ -69,7 +69,6 @@ while True:
 
     recognize_distance_to_traffic_light(traffic_light_image)
     traffic_light_color = detect_traffic_light_color(traffic_light_image)
-    print(traffic_light_color)
 
     cv2.imshow("Next Station Distance Image", next_station_image)
 
